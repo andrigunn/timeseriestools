@@ -15,7 +15,7 @@ parfor i = 1:length(fn)
         Rc,...
         tbl] = timetable2overlaystructure(ttbl);
 
-    fname = [char((fn(i))),'oly.mat']
+    fname = [char((fn(i))),'_oly.mat']
     parsave(fname, Rt,Rc,tbl);
 
 end
