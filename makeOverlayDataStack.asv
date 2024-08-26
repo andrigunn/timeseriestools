@@ -4,9 +4,7 @@
 %RELEASE NOTES
 %   Written by Andri Gunnarsson (andrigun@lv.is).
 %   Version 1.0 Released on 22 AUG 2024
-%   Updates:
-%   baseline functionality added - 26.08.2024
-
+%
 function [Rt,Rc,TB] = makeOverlayDataStack(time,data,baseline_period)
 % time is datenum on input
 % data is same lnght as time
