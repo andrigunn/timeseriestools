@@ -13,15 +13,18 @@ function [Rt,Rc,TB] = makeOverlayDataStack(time,data,baseline_period)
 % data = WData.Hraunvotn.ResLVL;
 % baseline_period = period used to calculate stats:
 % Median, mean, quantiles 
-%baseline_period = [datetime(1990,01,01),datetime(2020,12,31)];
+% baseline_period = [datetime(1990,01,01),datetime(2020,12,31)];
 
 disp('############# Making time series structure #############')
 disp(['## Proccess started at ',datestr(now)])
 
 TB = timetable(data,'rowtimes',time);
 
-full_period_for_baseline = [TB.Time(1),TB.Time(end)];
+%Hreinsum út hlaupaár
+ix = find((TB.Time.Month == 2)&(TB.Time.Day == 29));
+TB(ix,:) = [];
 
+full_period_for_baseline = [TB.Time(1),TB.Time(end)];
 
     if ~exist('baseline_period','var') || isempty(baseline_period)
       baseline_period = full_period_for_baseline;
@@ -72,13 +75,9 @@ end
 
 %%  
 R = removevars(R, 'Var1');
-%% Make stats tables 
-% Stats for time series
 Rt = R;
-% Remove leap years
-ix = find((Rt.Time.Month == 2)&(Rt.Time.Day == 29));
-R(ix,:) = [];
-%% Check what periods to use based on baseline 
+
+% Check what periods to use based on baseline 
 % 
 uqy_baseline_years = [baseline_period.Year(1):1:baseline_period.Year(end)];
 
@@ -88,7 +87,7 @@ ix = contains(fnames, string(uqy_baseline_years));
 % Filter stack to collect data from
 Rstats = Rt(:,ix);
 
-%%
+%
 stats = timetable2table(Rstats);
 stats(:,1) = [];
 Stats = table2array(stats);
@@ -108,25 +107,16 @@ Rt.Q95 = quantile(Stats,[0.95],2);
 
 %% Stats for cumulative time series
 Rc = R;
-
-Stats = table2array(Rc);
-StatsCsum = cumsum(Stats); % Þarf að vera meðvitaður um hvernig omitnan virkar við að teikna raðir
-%%
-Rc = array2timetable(Rc,'RowTimes',R.Time);
-vname = R.Properties.VariableNames;
-Rc.Properties.VariableNames = vname;
-%%
-% 
-uqy_baseline_years = [baseline_period.Year(1):1:baseline_period.Year(end)];
-
+%
 fnames = Rc.Properties.VariableNames;
 ix = contains(fnames, string(uqy_baseline_years));
 
 % Filter stack to collect data from
-Rstats = Rt(:,ix);
-Stats = table2array(Rstats);
-StatsCsum = cumsum(Stats); 
-%%
+Rcstats = Rc(:,ix);
+%
+Stats = table2array(Rcstats);
+StatsCsum = cumsum(Stats); % Þarf að vera meðvitaður um hvernig omitnan virkar við að teikna raðir
+
 Rc.AY_mean = nanmean(StatsCsum,2);
 Rc.AY_max = nanmax(StatsCsum,[],2);
 Rc.AY_min = nanmin(StatsCsum,[],2);

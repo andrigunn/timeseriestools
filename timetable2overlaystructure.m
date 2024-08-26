@@ -1,4 +1,4 @@
-function [Rt,Rc,tbl] = timetable2overlaystructure(ttbl)
+function [Rt,Rc,tbl] = timetable2overlaystructure(ttbl,baseline_period)
 % The function creates a structure of timetables in the overlay 
 % furher plotting
 %%
@@ -25,8 +25,7 @@ for i = 1:length(varnames)
 
     [Rt.(string(varname)),...
         Rc.(string(varname)),...
-        tbl.(string(varname))] = makeOverlayDataStack(time,data);
-
+        tbl.(string(varname))] = makeOverlayDataStack(time,data,baseline_period);
 
 end
 
