@@ -50,6 +50,8 @@ for i = 1:length(uqy)
 
     if i == 1
         tr = datenum([chy,10,01]):1:datenum([chy+1,09,30]);
+        ix = find(datenum([chy+1,02,29])==tr) % fiff fyrir hlaupaár
+        tr(ix) = [];
         R = timetable(ones(1,length(tr))','RowTimes',datetime(tr,'ConvertFrom','datenum'));
     else
     end
@@ -87,7 +89,6 @@ ix = contains(fnames, string(uqy_baseline_years));
 % Filter stack to collect data from
 Rstats = Rt(:,ix);
 
-%
 stats = timetable2table(Rstats);
 stats(:,1) = [];
 Stats = table2array(stats);
@@ -106,7 +107,7 @@ Rt.Q90 = quantile(Stats,[0.90],2);
 Rt.Q95 = quantile(Stats,[0.95],2);
 
 %% Stats for cumulative time series
-Rc = R;
+Rc = cumsum(R);
 %
 fnames = Rc.Properties.VariableNames;
 ix = contains(fnames, string(uqy_baseline_years));
