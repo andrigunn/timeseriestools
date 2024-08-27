@@ -24,9 +24,7 @@ disp('############# Making time series structure #############')
 disp(['## Proccess started at ',datestr(now)])
 
 TB = timetable(data,'rowtimes',time);
-newest_data_date = TB.Time(end);
-disp(['## Most recent data at ',datestr(newest_data_date)])
-%%
+
 full_period_for_baseline = [TB.Time(1),TB.Time(end)];
 
 if ~exist('baseline_period','var') || isempty(baseline_period)
@@ -52,7 +50,7 @@ if ~exist('zero_treatment','var') || isempty(zero_treatment)
     disp(['## Zero values are not adjusted - Os are Os'])
 
 else
-    disp(['## Zero values are replaced by ', num2str(zero_treatment)])
+    disp(['## Zero values are replaced by', num2str(zero_treatment)])
 end
 
 % Hreinsun og fiff á röðum
@@ -118,9 +116,7 @@ switch zero_treatment
 
 end
 %% Need to make sure that after data treatment that 
-% Everything newer thatn newest_data_date is set to NaN
-ix = find(TB.Time ==newest_data_date);
-TB(ix+1:end,:) = []; %+1 to include the last date
+
 %%
 % Check what the current hydrological year is
 
