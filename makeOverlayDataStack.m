@@ -57,9 +57,9 @@ end
 ix = find((TB.Time.Month == 2)&(TB.Time.Day == 29));
 TB(ix,:) = [];
 if isempty(ix)
-    disp(['## No values removed for leap year'])
+    %disp(['## No values removed for leap year'])
 else
-    disp(['## Total ',num2str((ix)),' values removed for leap year'])
+    %disp(['## Total ',num2str((ix)),' values removed for leap year'])
 end
 %%
 % NaN treatment - interpolation
