@@ -50,7 +50,6 @@ end
 if ~exist('zero_treatment','var') || isempty(zero_treatment)
     zero_treatment = 0;
     disp(['## Zero values are not adjusted - Os are Os'])
-
 else
     disp(['## Zero values are replaced by ', num2str(zero_treatment)])
 end
@@ -60,9 +59,9 @@ end
 ix = find((TB.Time.Month == 2)&(TB.Time.Day == 29));
 TB(ix,:) = [];
 if isempty(ix)
-    %disp(['## No values removed for leap year'])
+    disp(['## No values removed for leap year'])
 else
-    %disp(['## Total ',num2str((ix)),' values removed for leap year'])
+    disp(['## Values removed for leap year'])
 end
 %%
 % NaN treatment - interpolation
@@ -117,10 +116,7 @@ switch zero_treatment
     otherwise
 
 end
-%% Need to make sure that after data treatment that 
-% Everything newer thatn newest_data_date is set to NaN
-ix = find(TB.Time ==newest_data_date);
-TB(ix+1:end,:) = []; %+1 to include the last date
+
 %%
 % Check what the current hydrological year is
 
@@ -155,6 +151,7 @@ for i = 1:length(uqy)
 
     for ii = 1:height(R);
         ix = find((R.Time.Month(ii) ==  r.Time.Month)&(R.Time.Day(ii) ==  r.Time.Day));
+        
         if isempty(ix);
         else
             R.(string(['HY_',num2str(uqy(i))]))(ii) = r.data(ix);
@@ -163,7 +160,13 @@ for i = 1:length(uqy)
     end
 end
 
-%%
+%% Need to make sure that after data treatment that 
+% Everything newer thatn newest_data_date is set to NaN
+ix = find((R.Time.Year==newest_data_date.Year)&...
+    (R.Time.Month==newest_data_date.Month)&...
+    (R.Time.Day==newest_data_date.Day));
+R.(string(['HY_',num2str(chy)]))(ix+1:end) = NaN; %+1 to include the last date
+%
 disp(['## Making Rt structure with stats'])
 
 R = removevars(R, 'Var1');
@@ -198,7 +201,7 @@ Rt.Q95 = quantile(Stats,[0.95],2);
 
 %% Stats for cumulative time series
 disp(['## Making Rc structure with stats'])
-Rc = cumsum(R,'omitmissing');
+Rc = cumsum(R);
 %
 fnames = Rc.Properties.VariableNames;
 ix = contains(fnames, string(uqy_baseline_years));
