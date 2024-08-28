@@ -6,7 +6,6 @@ function par_structure_of_timetables_to_overlay(structure_of_tables,baseline_per
 %%
 fn = fieldnames(structure_of_tables);
 
-%
 parfor i = 1:length(fn)
     ttbl = structure_of_tables.(string(fn(i)))
     disp((string(fn(i))))
