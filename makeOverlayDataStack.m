@@ -161,12 +161,20 @@ for i = 1:length(uqy)
 end
 
 %% Need to make sure that after data treatment that 
-% Everything newer thatn newest_data_date is set to NaN
+% Everything newer than newest_data_date is set to NaN. 
 ix = find((R.Time.Year==newest_data_date.Year)&...
     (R.Time.Month==newest_data_date.Month)&...
     (R.Time.Day==newest_data_date.Day));
+
+% Check the hydrological year of 
+if month(newest_data_date) < 10
+    chy = year(newest_data_date)-1
+else
+    chy = year(newest_data_date)
+end
+%%
 R.(string(['HY_',num2str(chy)]))(ix+1:end) = NaN; %+1 to include the last date
-%
+%%
 disp(['## Making Rt structure with stats'])
 
 R = removevars(R, 'Var1');
