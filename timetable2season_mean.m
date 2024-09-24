@@ -122,7 +122,7 @@ for ii = 1:length(vars)
 
         tr = timerange(oTable.DJF.from(i),oTable.DJF.to(i));
         
-        oTable.DJF.(string(var))(i) = mean(iTable.(string(var))(tr,:));
+        oTable.DJF.(string(var))(i) = cd(iTable.(string(var))(tr,:));
     end
 end
 
