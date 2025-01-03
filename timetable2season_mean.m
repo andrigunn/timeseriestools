@@ -1,11 +1,10 @@
-
-
-function [oTable, oTTable] = timetable2season(iTable)
-
+function [oTable, oTTable] = timetable2season_mean(iTable)
+%%
 oTable = struct;
 oTTable = struct;
 
 oTable.ONDJFMA = table();
+oTable.ONDJFM = table();
 oTable.SON = table();
 oTable.MJJA = table();
 oTable.MJJAS = table();
@@ -27,7 +26,7 @@ for ii = 1:length(vars)
 
         tr = timerange(oTable.ONDJFMA.from(i),oTable.ONDJFMA.to(i));
         
-        oTable.ONDJFMA.(string(var))(i) = mean(iTable.(string(var))(tr,:));
+        oTable.ONDJFMA.(string(var))(i) = mean(iTable.(string(var))(tr,:),'omitmissing');
     end
 end
 
@@ -36,8 +35,27 @@ oTTable.ONDJFMA = splitvars(timetable(oTable.ONDJFMA,...
 
 oTTable.ONDJFMA.from = [];
 oTTable.ONDJFMA.to = [];
+%%
+% Winter mean ONDJFM
+for ii = 1:length(vars)
+        var = vars(ii);
+    for i = 1:length(uqy)
+        oTable.ONDJFM.from(i) = datetime(uqy(i),10,1);
+        oTable.ONDJFM.to(i) = datetime(uqy(i)+1,03,31);
 
-% Fall mean SON
+        tr = timerange(oTable.ONDJFM.from(i),oTable.ONDJFM.to(i))
+        
+        oTable.ONDJFM.(string(var))(i) = mean(iTable.(string(var))(tr,:),'omitmissing');
+    end
+end
+
+oTTable.ONDJFM = splitvars(timetable(oTable.ONDJFM,...
+    'RowTimes',oTable.ONDJFM.from));
+
+oTTable.ONDJFM.from = [];
+oTTable.ONDJFM.to = [];
+
+%% Fall mean SON
 for ii = 1:length(vars)
         var = vars(ii);
     for i = 1:length(uqy)
@@ -46,7 +64,7 @@ for ii = 1:length(vars)
 
         tr = timerange(oTable.SON.from(i),oTable.SON.to(i));
         
-        oTable.SON.(string(var))(i) = mean(iTable.(string(var))(tr,:));
+        oTable.SON.(string(var))(i) = mean(iTable.(string(var))(tr,:),'omitmissing');
     end
 end
 
@@ -65,7 +83,7 @@ for ii = 1:length(vars)
 
         tr = timerange(oTable.MJJA.from(i),oTable.MJJA.to(i));
         
-        oTable.MJJA.(string(var))(i) = mean(iTable.(string(var))(tr,:));
+        oTable.MJJA.(string(var))(i) = mean(iTable.(string(var))(tr,:),'omitmissing');
     end
 end
 
@@ -84,7 +102,7 @@ for ii = 1:length(vars)
 
         tr = timerange(oTable.MJJAS.from(i),oTable.MJJAS.to(i));
         
-        oTable.MJJAS.(string(var))(i) = mean(iTable.(string(var))(tr,:));
+        oTable.MJJAS.(string(var))(i) = mean(iTable.(string(var))(tr,:),'omitmissing');
     end
 end
 
@@ -103,7 +121,7 @@ for ii = 1:length(vars)
 
         tr = timerange(oTable.AM.from(i),oTable.AM.to(i));
         
-        oTable.AM.(string(var))(i) = mean(iTable.(string(var))(tr,:));
+        oTable.AM.(string(var))(i) = mean(iTable.(string(var))(tr,:),'omitmissing');
     end
 end
 
@@ -122,7 +140,7 @@ for ii = 1:length(vars)
 
         tr = timerange(oTable.DJF.from(i),oTable.DJF.to(i));
         
-        oTable.DJF.(string(var))(i) = cd(iTable.(string(var))(tr,:));
+        oTable.DJF.(string(var))(i) = mean(iTable.(string(var))(tr,:),'omitmissing');
     end
 end
 
@@ -147,7 +165,7 @@ for ii = 1:length(vars)
 
         tr = timerange(oTable.hY.from(i),oTable.hY.to(i));
         
-        oTable.hY.(string(var))(i) = mean(iTable.(string(var))(tr,:));
+        oTable.hY.(string(var))(i) = mean(iTable.(string(var))(tr,:),'omitmissing');
     end
 end
 

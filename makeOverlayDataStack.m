@@ -6,9 +6,12 @@
 %   Version 1.0 Released on 22 AUG 2024
 %   Updates:
 %   baseline functionality added - 26.08.2024
+%   quantile stack added and output changed to O as a structure with
+%   all needed outputs - 03.01.2025
 
-function [Rt,Rc,TB] = makeOverlayDataStack(time,data,baseline_period,...
+function [O] = makeOverlayDataStack(time,data,baseline_period,...
     nan_treatment,zero_treatment)
+%%
 % time is datenum on input
 % data is same lnght as time
 % %% TESTING
@@ -26,7 +29,7 @@ disp(['## Proccess started at ',datestr(now)])
 TB = timetable(data,'rowtimes',time);
 newest_data_date = TB.Time(end);
 disp(['## Most recent data at ',datestr(newest_data_date)])
-%%
+%
 full_period_for_baseline = [TB.Time(1),TB.Time(end)];
 
 if ~exist('baseline_period','var') || isempty(baseline_period)
@@ -63,7 +66,7 @@ if isempty(ix)
 else
     disp(['## Values removed for leap year'])
 end
-%%
+
 % NaN treatment - interpolation
 switch nan_treatment
     case 'linear'
@@ -102,7 +105,7 @@ switch nan_treatment
             TB.data = fillmissing(TB.data, 'linear');
     otherwise
 end
-%% Treat zero values if needed
+% Treat zero values if needed
 switch zero_treatment
     case 'NaN'
         disp(['## Convert zero values to NaN'])
@@ -117,7 +120,7 @@ switch zero_treatment
 
 end
 
-%%
+
 % Check what the current hydrological year is
 
 if month(now) < 10
@@ -126,7 +129,7 @@ else
     chy = year(now);
 end
 
-%% R = timetable(TB);
+% R = timetable(TB);
 disp(['## Making data cube for time series'])
 uqy = unique(TB.Time.Year);
 disp(['## Total of ',num2str(numel(uqy)),' hydrological years'])
@@ -160,7 +163,7 @@ for i = 1:length(uqy)
     end
 end
 
-%% Need to make sure that after data treatment that 
+% Need to make sure that after data treatment that 
 % Everything newer than newest_data_date is set to NaN. 
 ix = find((R.Time.Year==newest_data_date.Year)&...
     (R.Time.Month==newest_data_date.Month)&...
@@ -168,13 +171,13 @@ ix = find((R.Time.Year==newest_data_date.Year)&...
 
 % Check the hydrological year of 
 if month(newest_data_date) < 10
-    chy = year(newest_data_date)-1
+    chy = year(newest_data_date)-1;
 else
-    chy = year(newest_data_date)
+    chy = year(newest_data_date);
 end
-%%
+%
 R.(string(['HY_',num2str(chy)]))(ix+1:end) = NaN; %+1 to include the last date
-%%
+%
 disp(['## Making Rt structure with stats'])
 
 R = removevars(R, 'Var1');
@@ -207,7 +210,7 @@ Rt.Q75 = quantile(Stats,[0.75],2);
 Rt.Q90 = quantile(Stats,[0.90],2);
 Rt.Q95 = quantile(Stats,[0.95],2);
 
-%% Stats for cumulative time series
+% Stats for cumulative time series
 disp(['## Making Rc structure with stats'])
 Rc = cumsum(R);
 %
@@ -230,6 +233,34 @@ Rc.Q50 = quantile(Stats,[0.50],2);
 Rc.Q75 = quantile(Stats,[0.75],2);
 Rc.Q90 = quantile(Stats,[0.90],2);
 Rc.Q95 = quantile(Stats,[0.95],2);
+
+%% Make percentile stack Qt
+dataMatrix = R{:, :};
+% Compute percentiles row-wise
+%percentileMatrix = zeros(size(dataMatrix));
+percentileMatrix = nan(size(dataMatrix));
+%
+for i = 1:size(dataMatrix, 1) % Loop over each row
+    % Rank the values in the row and compute percentiles
+    [~, rankIdx] = sort(dataMatrix(i, :), 'ascend');
+    percentiles = (1:length(rankIdx)) / length(rankIdx) * 100;
+    percentileMatrix(i, rankIdx) = percentiles;
+end
+%% Treat NaN values correctly so NaN's from R remain in Qt
+maskMatrix = double(~isnan(dataMatrix)); 
+maskMatrix(maskMatrix == 0) = NaN;
+resultMatrix = percentileMatrix .* maskMatrix;
+%%
+% Add the percentiles back to the timetable (optional)
+Qt = array2timetable(resultMatrix, 'RowTimes', R.Time);
+Qt.Properties.VariableNames = R.Properties.VariableNames;
+%%
+
+O.tbl = TB; % Timetable used in the analysis
+O.prc = Qt; % Percentail structure
+O.rc = Rc;  % Cumulative table
+O.rt = Rt;  % Timeseries table
+O.baseline_period = baseline_period;
 
 disp('#############             DONE             #############')
 

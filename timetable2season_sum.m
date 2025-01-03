@@ -1,11 +1,11 @@
 
-
 function [oTable, oTTable] = timetable2season_sum(iTable)
 
 oTable = struct;
 oTTable = struct;
 
 oTable.ONDJFMA = table();
+oTable.ONDJFM = table();
 oTable.SON = table();
 oTable.MJJA = table();
 oTable.MJJAS = table();
@@ -36,6 +36,25 @@ oTTable.ONDJFMA = splitvars(timetable(oTable.ONDJFMA,...
 
 oTTable.ONDJFMA.from = [];
 oTTable.ONDJFMA.to = [];
+
+% Winter sum ONDJFM
+for ii = 1:length(vars)
+        var = vars(ii);
+    for i = 1:length(uqy)
+        oTable.ONDJFM.from(i) = datetime(uqy(i),10,1);
+        oTable.ONDJFM.to(i) = datetime(uqy(i)+1,03,31);
+
+        tr = timerange(oTable.ONDJFM.from(i),oTable.ONDJFM.to(i));
+        
+        oTable.ONDJFM.(string(var))(i) = sum(iTable.(string(var))(tr,:));
+    end
+end
+
+oTTable.ONDJFM = splitvars(timetable(oTable.ONDJFM,...
+    'RowTimes',oTable.ONDJFM.from));
+
+oTTable.ONDJFM.from = [];
+oTTable.ONDJFM.to = [];
 
 % Fall sum SON
 for ii = 1:length(vars)

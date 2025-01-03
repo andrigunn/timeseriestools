@@ -1,3 +1,5 @@
+
+
 function [ttblM, ttblY] = timetable2anomalies(time, data,varname,baseline_period)
 % reads a timetalble, montly or yearly and makes anomalies according to the
 % baseline_period
